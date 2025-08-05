@@ -1,0 +1,10 @@
+cloudpickle
+minio
+numpy
+polars
+redis
+requests
+rq
+rq-dashboard
+scikit-learn
+setproctitle
