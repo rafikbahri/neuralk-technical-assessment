@@ -37,10 +37,18 @@ from rq import Queue, Retry
 from rq.job import Job
 from redis import Redis
 
+from logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class Handler(BaseHTTPRequestHandler):
 
     error_message_format = "%(code)d %(message)s\n"
+    
+    def log_message(self, format, *args):
+        """Override the default log_message to use our logger"""
+        logger.info("%s - %s" % (self.address_string(), format % args))
 
     def __send_response(self, msg):
         msg = msg.encode("utf-8")
@@ -68,13 +76,14 @@ class Handler(BaseHTTPRequestHandler):
         try:
             method(query)
         except Exception as e:
-            print(type(e), e)
+            logger.error(f"Error processing request: {type(e).__name__}: {e}", exc_info=True)
             self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Error")
 
     def _do_GET_upload(self, query):
         del query
         id = str(uuid.uuid4())
         url = MINIO.get_presigned_url("PUT", "datasets", id)
+        logger.info(f"Dataset upload requested. Generated ID: {id}")
         self.__send_response(json.dumps({"url": url, "id": id}))
 
     def _do_GET_status(self, query):
@@ -112,6 +121,7 @@ class Handler(BaseHTTPRequestHandler):
         data_url = MINIO.get_presigned_url("GET", "datasets", data_id)
         model_id = str(uuid.uuid4())
         model_url = MINIO.get_presigned_url("PUT", "models", model_id)
+        logger.info(f"Model training requested. Dataset ID: {data_id}, Model ID: {model_id}")
         QUEUE.enqueue(
             "ml.fit",
             args=(data_url, model_url),
@@ -119,6 +129,7 @@ class Handler(BaseHTTPRequestHandler):
             job_id=model_id,
             retry=Retry(max=4),
         )
+        logger.debug(f"Fit job enqueued with ID: {model_id}")
         self.__send_response(json.dumps({"id": model_id}))
 
     def _do_POST_predict(self, query):
@@ -128,6 +139,7 @@ class Handler(BaseHTTPRequestHandler):
         model_url = MINIO.get_presigned_url("GET", "models", model_id)
         result_id = str(uuid.uuid4())
         result_url = MINIO.get_presigned_url("PUT", "results", result_id)
+        logger.info(f"Prediction requested. Dataset ID: {data_id}, Model ID: {model_id}, Result ID: {result_id}")
         QUEUE.enqueue(
             "ml.predict",
             args=(data_url, model_url, result_url),
@@ -135,6 +147,7 @@ class Handler(BaseHTTPRequestHandler):
             job_id=result_id,
             retry=Retry(max=4),
         )
+        logger.debug(f"Predict job enqueued with ID: {result_id}")
         self.__send_response(json.dumps({"id": result_id}))
 
 
@@ -158,7 +171,7 @@ if __name__ == "__main__":
     REDIS = Redis()
     QUEUE = Queue(connection=REDIS)
 
-    print(f"serving at {HOST} {PORT}")
+    logger.info(f"Server starting at {HOST}:{PORT}")
 
     with ThreadingHTTPServer((HOST, PORT), Handler) as server:
         try:
