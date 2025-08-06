@@ -1,6 +1,9 @@
 """
 Launch 40 `fit` tasks at the same time.
 """
+import os
+from pathlib import Path
+
 from client import Client
 
 client = Client()

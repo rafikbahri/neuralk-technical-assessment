@@ -8,6 +8,8 @@ import logging.handlers
 import os
 from datetime import datetime
 
+from config import LOG_LEVEL
+
 os.makedirs("logs", exist_ok=True)
 
 # Logging levels mapping for configuration
@@ -18,8 +20,7 @@ LOG_LEVELS = {
     "ERROR": logging.ERROR,
     "CRITICAL": logging.CRITICAL
 }
-log_level_name = os.environ.get("LOG_LEVEL", "INFO")
-log_level = LOG_LEVELS.get(log_level_name, logging.INFO)
+log_level = LOG_LEVELS.get(LOG_LEVEL, logging.INFO)
 
 log_format = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

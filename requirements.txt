@@ -2,6 +2,7 @@ cloudpickle
 minio
 numpy
 polars
+python-dotenv
 redis
 requests
 rq

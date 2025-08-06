@@ -3,17 +3,14 @@ Python client for the API implemented by `server.py`
 """
 import time
 import datetime
-import os
 
 import polars as pl
 import requests
 
+import config
 from logger import get_logger
 
 logger = get_logger(__name__)
-
-HOST = os.environ.get("SERVER_HOST", "localhost")
-PORT = int(os.environ.get("SERVER_PORT", "8080"))
 
 
 class NoResult(Exception):
@@ -22,10 +19,10 @@ class NoResult(Exception):
 
 class Client:
     """Client for the API exposed by server.py"""
-    def __init__(self, host=HOST, port=PORT):
-        self.host = host
-        self.port = port
-        self.url = f"http://{host}:{port}"
+    def __init__(self, host=None, port=None):
+        self.host = host or config.SERVER_HOST
+        self.port = port or config.SERVER_PORT
+        self.url = f"http://{self.host}:{self.port}"
         logger.debug(f"Client initialized with URL: {self.url}")
 
     def upload(self, file_path):

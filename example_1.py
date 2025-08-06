@@ -2,6 +2,9 @@
 Fit a model and later use it to make a prediction.
 """
 import argparse
+import os
+import sys
+from pathlib import Path
 
 from client import Client
 
