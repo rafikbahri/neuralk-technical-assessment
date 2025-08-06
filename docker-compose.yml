@@ -1,0 +1,65 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: neuralk-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - neuralk-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: neuralk-minio
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - neuralk-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Initialize MinIO on startup
+  init_minio:
+    image: minio/mc
+    container_name: neuralk-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set neuralk http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing neuralk/datasets &&
+      mc mb --ignore-existing neuralk/models &&
+      mc mb --ignore-existing neuralk/results
+      "
+    networks:
+      - neuralk-network
+
+networks:
+  neuralk-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
+  minio-data:
+    driver: local
