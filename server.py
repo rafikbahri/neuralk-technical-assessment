@@ -32,11 +32,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 import uuid
 
-import minio
 from rq import Queue, Retry
 from rq.job import Job
-from redis import Redis
 
+import config
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -125,9 +124,9 @@ class Handler(BaseHTTPRequestHandler):
         QUEUE.enqueue(
             "ml.fit",
             args=(data_url, model_url),
-            job_timeout="600s",
+            job_timeout=config.JOB_TIMEOUT,
             job_id=model_id,
-            retry=Retry(max=4),
+            retry=Retry(max=config.MAX_RETRIES),
         )
         logger.debug(f"Fit job enqueued with ID: {model_id}")
         self.__send_response(json.dumps({"id": model_id}))
@@ -143,9 +142,9 @@ class Handler(BaseHTTPRequestHandler):
         QUEUE.enqueue(
             "ml.predict",
             args=(data_url, model_url, result_url),
-            job_timeout="600s",
+            job_timeout=config.JOB_TIMEOUT,
             job_id=result_id,
-            retry=Retry(max=4),
+            retry=Retry(max=config.MAX_RETRIES),
         )
         logger.debug(f"Predict job enqueued with ID: {result_id}")
         self.__send_response(json.dumps({"id": result_id}))
@@ -153,23 +152,22 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", "-p", type=int, default=8080)
+    parser.add_argument("--port", "-p", type=int, default=config.SERVER_PORT)
     args = parser.parse_args()
 
-    HOST, PORT = "localhost", args.port
-    MINIO = minio.Minio(
-        "localhost:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False,
-    )
-    all_buckets = MINIO.list_buckets()
+    HOST, PORT = config.SERVER_HOST, args.port
+    
+    # Get MinIO client from config
+    MINIO = config.get_minio_client()
+    
+    all_buckets = [bucket.name for bucket in MINIO.list_buckets()]
     for bucket in ["datasets", "models", "results"]:
         if bucket not in all_buckets:
+            logger.info(f"Creating bucket: {bucket}")
             MINIO.make_bucket(bucket)
 
-    REDIS = Redis()
-    QUEUE = Queue(connection=REDIS)
+    REDIS = config.get_redis_connection()
+    QUEUE = Queue(config.QUEUE_NAME, connection=REDIS)
 
     logger.info(f"Server starting at {HOST}:{PORT}")
 

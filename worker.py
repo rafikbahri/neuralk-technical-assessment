@@ -5,10 +5,10 @@ RQ worker to allow adding exception handlers. To use it, start the worker with
 See details in the RQ documentation:
 https://python-rq.org/docs/workers/
 """
-from redis import Redis
 import rq
 import setproctitle
 
+import config
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -41,8 +41,12 @@ class Worker(rq.Worker):
 if __name__ == "__main__":
     setproctitle.setproctitle("neuralk-worker")
     logger.info("Starting RQ worker")
-    w = Worker(["default"], connection=Redis())
+    
+    redis_conn = config.get_redis_connection()    
+    w = Worker([config.QUEUE_NAME], connection=redis_conn)
+    
     try:
+        logger.info(f"Worker listening to queue: {config.QUEUE_NAME}")
         w.work()
     except KeyboardInterrupt:
         logger.info("Worker stopped by user")
