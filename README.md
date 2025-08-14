@@ -123,3 +123,36 @@ Available configuration options:
 | JOB_TIMEOUT | RQ job timeout | 600s |
 | MAX_RETRIES | Maximum retries for failed jobs | 4 |
 | QUEUE_NAME | Name of the RQ queue | default |
+
+## Docker Setup
+
+This project includes Docker Compose configuration for running the required services. The Docker Compose setup includes:
+
+- **Redis**: For job queue management
+- **MinIO**: For object storage (datasets, models, results)
+- **Server**: API server that handles client requests
+- **Worker**: For processing ML tasks in the background
+- **Client**: For interacting with the API
+
+To run the complete stack with Docker Compose, run:
+
+```bash
+docker-compose up -d
+```
+
+The client component is actively running and waiting for user commands.
+To run the client workflow, start with generating data:
+
+```bash
+docker-compose exec -t client python make-data.py
+```
+
+Then, you can run the client examples:
+
+```bash
+docker-compose exec -t client python example_1.py --test <test_data_path> --model <model_path>
+```
+
+```bash
+docker-compose exec -t client python example_2.py --test <test_data_path> --model <model_path>
+```
