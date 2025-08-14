@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: neuralk
+  labels:
+    app: worker
+spec:
+  replicas: 2  # Adjust according to workload
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: rafik08/neuralk-worker:latest  # Replace with your actual registry
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: neuralk-config
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        # Add liveness probe
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - "python worker.py"
+          initialDelaySeconds: 30
+          periodSeconds: 15

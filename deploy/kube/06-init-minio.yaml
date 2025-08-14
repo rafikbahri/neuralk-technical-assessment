@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-minio
+  namespace: neuralk
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: init-minio
+        image: minio/mc
+        command:
+        - /bin/sh
+        - -c
+        - |
+          mc alias set neuralk http://minio:9000 minioadmin minioadmin && \
+          mc mb --ignore-existing neuralk/datasets && \
+          mc mb --ignore-existing neuralk/models && \
+          mc mb --ignore-existing neuralk/results
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+          requests:
+            memory: "64Mi"
+            cpu: "50m"

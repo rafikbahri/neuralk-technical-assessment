@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: neuralk
+  labels:
+    app: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+      - name: client
+        image: rafik08/neuralk-client:latest  # Replace with your actual registry
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: neuralk-config
+        env:
+        - name: SERVER_HOST
+          value: "server"  # Use the Kubernetes service name
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: client-data
+          mountPath: /app/data
+      volumes:
+      - name: client-data
+        emptyDir: {}  # For demo purposes; use a PVC for production

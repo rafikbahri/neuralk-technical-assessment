@@ -156,3 +156,18 @@ docker-compose exec -t client python example_1.py --test <test_data_path> --mode
 ```bash
 docker-compose exec -t client python example_2.py --test <test_data_path> --model <model_path>
 ```
+
+For more details on Docker deployment, see [DOCKER.md](DOCKER.md).
+
+## Kubernetes Setup
+
+For production deployments, the project includes Kubernetes manifests for deploying all components to a Kubernetes cluster. The manifests are located in the `deploy/kube` directory and include:
+
+- Namespace and configuration
+- Redis deployment
+- MinIO object storage
+- API server
+- ML workers with autoscaling
+- Client deployment
+
+For detailed instructions on Kubernetes deployment, see [deploy/kube/README.md](deploy/kube/README.md).
