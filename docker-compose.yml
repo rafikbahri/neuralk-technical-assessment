@@ -1,7 +1,6 @@
 services:
   redis:
     image: redis:alpine
-    container_name: neuralk-redis
     ports:
       - "6379:6379"
     volumes:
@@ -18,7 +17,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: neuralk-minio
     ports:
       - "9000:9000"  # API
       - "9001:9001"  # Console
@@ -40,7 +38,6 @@ services:
   # Initialize MinIO on startup
   init_minio:
     image: minio/mc
-    container_name: neuralk-minio-init
     depends_on:
       minio:
         condition: service_healthy
@@ -59,7 +56,12 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/worker/Dockerfile
-    container_name: neuralk-worker
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: 1
+          memory: 1024M
     depends_on:
       redis:
         condition: service_healthy
@@ -74,7 +76,6 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/server/Dockerfile
-    container_name: neuralk-server
     ports:
       - "8080:8080"
     depends_on:
@@ -85,6 +86,19 @@ services:
     restart: unless-stopped
     networks:
       - neuralk-network
+      
+  # Client service for interacting with the API
+  client:
+    build:
+      context: .
+      dockerfile: deploy/docker/client/Dockerfile
+    depends_on:
+      - server
+    volumes:
+      - ./data:/app/data
+    networks:
+      - neuralk-network
+    restart: unless-stopped
 
 networks:
   neuralk-network:
