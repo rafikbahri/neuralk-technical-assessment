@@ -69,6 +69,23 @@ services:
     networks:
       - neuralk-network
 
+  # Server service for API endpoints
+  server:
+    build:
+      context: .
+      dockerfile: deploy/docker/server/Dockerfile
+    container_name: neuralk-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - neuralk-network
+
 networks:
   neuralk-network:
     driver: bridge
