@@ -7,11 +7,11 @@ Neuralk AI Technical Assessment - DevOps / SRE
 ```mermaid
 graph TD
     %% Define Client interactions
-    Client([Client]) --> |1. Upload dataset| Server
-    Client --> |3. Request model training| Server
-    Client --> |5. Upload test data| Server
-    Client --> |7. Request prediction| Server
-    Client --> |9. Download results| Server
+    Client([Client]) --> |1\. Upload dataset| Server
+    Client --> |3\. Request model training| Server
+    Client --> |5\. Upload test data| Server
+    Client --> |7\. Request prediction| Server
+    Client --> |9\. Download results| Server
     Client --> |Check job status| Server
     
     %% Define Server component
@@ -48,10 +48,10 @@ graph TD
     end
     
     %% Define flow from server to storage
-    Upload --> |2. Generate presigned URL| Datasets
-    Fit --> |4. Enqueue fit job| Queue
-    Predict --> |8. Enqueue predict job| Queue
-    Result --> |10. Generate download URL| Results
+    Upload --> |2\. Generate presigned URL| Datasets
+    Fit --> |4\. Enqueue fit job| Queue
+    Predict --> |8\. Enqueue predict job| Queue
+    Result --> |10\. Generate download URL| Results
     Status --> |Query job status| Queue
     
     %% Define worker interactions
