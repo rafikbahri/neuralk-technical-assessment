@@ -184,5 +184,4 @@ helm install neuralk ./deploy/helm/neuralk -f deploy/helm/neuralk/values-dev.yam
 ```
 
 For more details on the Helm chart, see [deploy/helm/neuralk/README.md](deploy/helm/neuralk/README.md).
-=======
 
