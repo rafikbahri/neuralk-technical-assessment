@@ -1,0 +1,9 @@
+apiVersion: v2
+name: neuralk
+description: A Helm chart for Neuralk ML API
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Neuralk Team
+    email: team@neuralk.ai

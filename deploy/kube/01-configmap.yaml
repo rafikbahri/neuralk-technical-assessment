@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neuralk-config
+  namespace: neuralk
+data:
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  MINIO_HOST: "minio:9000"
+  MINIO_ACCESS_KEY: "minioadmin"
+  MINIO_SECRET_KEY: "minioadmin"
+  MINIO_SECURE: "False"
+  LOG_LEVEL: "INFO"
+  JOB_TIMEOUT: "600s"
+  MAX_RETRIES: "4"
+  QUEUE_NAME: "default"
+  SERVER_HOST: "0.0.0.0"
+  SERVER_PORT: "8080"

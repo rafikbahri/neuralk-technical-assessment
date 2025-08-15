@@ -1,0 +1,44 @@
+{{- if .Values.client.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "neuralk.fullname" . }}-client
+  namespace: {{ .Values.namespace.name | default (printf "neuralk-%s" .Values.global.environment) }}
+  labels:
+    {{- include "neuralk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: client
+spec:
+  replicas: {{ .Values.client.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "neuralk.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: client
+  template:
+    metadata:
+      labels:
+        {{- include "neuralk.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: client
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: client
+          image: {{ include "neuralk.client.image" . }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "neuralk.fullname" . }}-config
+          env:
+            - name: SERVER_HOST
+              value: {{ include "neuralk.fullname" . }}-server
+          resources:
+            {{- toYaml .Values.client.resources | nindent 12 }}
+          volumeMounts:
+            - name: client-data
+              mountPath: /app/data
+      volumes:
+        - name: client-data
+          emptyDir: {}
+{{- end }}

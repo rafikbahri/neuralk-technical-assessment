@@ -1,0 +1,58 @@
+global:
+  environment: dev
+  imageTag: latest
+
+namespace:
+  name: neuralk-dev
+
+redis:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+minio:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+worker:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+server:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+client:
+  resources: {}
+ingress:
+  enabled: false
+  hosts:
+    server:
+      host: api.neuralk.dev.local
+    minio:
+      host: minio.neuralk.dev.local
+
+config:
+  logLevel: DEBUG

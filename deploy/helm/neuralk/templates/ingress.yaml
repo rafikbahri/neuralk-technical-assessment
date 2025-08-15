@@ -1,0 +1,58 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "neuralk.fullname" . -}}
+{{- $namespace := .Values.namespace.name | default (printf "neuralk-%s" .Values.global.environment) -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-ingress
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "neuralk.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.hosts.server.host }}
+    - host: {{ .Values.ingress.hosts.server.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.hosts.server.paths | default (list (dict "path" "/" "pathType" "Prefix")) }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}-server
+                port:
+                  number: {{ $.Values.server.service.port }}
+          {{- end }}
+    {{- end }}
+    {{- if .Values.ingress.hosts.minio.host }}
+    - host: {{ .Values.ingress.hosts.minio.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.hosts.minio.paths | default (list (dict "path" "/" "pathType" "Prefix")) }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}-minio
+                port:
+                  number: {{ .port | default 9001 }}
+          {{- end }}
+    {{- end }}
+{{- end }}
