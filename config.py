@@ -40,6 +40,10 @@ MAX_RETRIES = int(os.environ.get("MAX_RETRIES", "4"))
 # Queue name
 QUEUE_NAME = os.environ.get("QUEUE_NAME", "default")
 
+# Proxy to the Minio docker container - needed for client to use presigned URLs
+MINIO_PROXY_ADDRESS = os.environ.get("MINIO_PROXY_ADDRESS", "localhost")
+MINIO_PROXY_PORT = int(os.environ.get("MINIO_PROXY_PORT", "9002"))
+
 def get_redis_connection():
     """Returns a configured Redis connection"""
     from redis import Redis
