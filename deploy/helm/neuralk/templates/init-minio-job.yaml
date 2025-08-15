@@ -1,0 +1,46 @@
+{{- if and .Values.minio.enabled .Values.minio.buckets -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "neuralk.fullname" . }}-init-minio
+  namespace: {{ .Values.namespace.name | default (printf "neuralk-%s" .Values.global.environment) }}
+  labels:
+    {{- include "neuralk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: init-minio
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      labels:
+        {{- include "neuralk.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: init-minio
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      containers:
+        - name: init-minio
+          image: minio/mc
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              mc alias set neuralk http://{{ include "neuralk.fullname" . }}-minio:9000 {{ .Values.minio.credentials.accessKey }} {{ .Values.minio.credentials.secretKey }}
+              {{- range .Values.minio.buckets }}
+              mc mb --ignore-existing neuralk/{{ .name }}
+              {{- end }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+{{- end }}

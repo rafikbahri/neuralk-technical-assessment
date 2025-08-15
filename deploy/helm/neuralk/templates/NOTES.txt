@@ -1,0 +1,28 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }} in namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+You can access the application at:
+
+API Server: {{ if .Values.ingress.hosts.server.host }}http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.hosts.server.host }}{{ end }}
+MinIO Console: {{ if .Values.ingress.hosts.minio.host }}http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.hosts.minio.host }}{{ end }}
+
+Default MinIO credentials:
+  Access Key: {{ .Values.minio.credentials.accessKey }}
+  Secret Key: {{ .Values.minio.credentials.secretKey }}
+{{- else }}
+To access the API server, run:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "neuralk.fullname" . }}-server {{ .Values.server.service.port }}:{{ .Values.server.service.port }}
+Then access http://localhost:{{ .Values.server.service.port }}
+
+To access MinIO Console, run:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "neuralk.fullname" . }}-minio {{ .Values.minio.service.consolePort }}:{{ .Values.minio.service.consolePort }}
+Then access http://localhost:{{ .Values.minio.service.consolePort }}
+{{- end }}
+
+To check the status of your deployment:
+  kubectl get pods -n {{ .Release.Namespace }}
+
+For more information, see the chart's README.md file or run:
+  helm get all {{ .Release.Name }} -n {{ .Release.Namespace }}

@@ -171,3 +171,16 @@ For production deployments, the project includes Kubernetes manifests for deploy
 - Client deployment
 
 For detailed instructions on Kubernetes deployment, see [deploy/kube/README.md](deploy/kube/README.md).
+
+## Helm Chart
+
+For easier deployment and management of the application across different environments, a Helm chart is provided in the `deploy/helm/neuralk` directory.
+
+### Installation
+
+```bash
+# For development environment
+helm install neuralk ./deploy/helm/neuralk -f deploy/helm/neuralk/values-dev.yaml --create-namespace -n neuralk-dev
+```
+
+For more details on the Helm chart, see [deploy/helm/neuralk/README.md](deploy/helm/neuralk/README.md).

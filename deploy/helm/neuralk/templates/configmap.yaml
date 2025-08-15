@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "neuralk.fullname" . }}-config
+  namespace: {{ .Values.namespace.name | default (printf "neuralk-%s" .Values.global.environment) }}
+  labels:
+    {{- include "neuralk.labels" . | nindent 4 }}
+data:
+  REDIS_HOST: {{ include "neuralk.fullname" . }}-redis
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  MINIO_HOST: {{ include "neuralk.fullname" . }}-minio:9000
+  MINIO_ACCESS_KEY: {{ .Values.minio.credentials.accessKey }}
+  MINIO_SECRET_KEY: {{ .Values.minio.credentials.secretKey }}
+  MINIO_SECURE: "{{ .Values.minio.credentials.secure | default "False" }}"
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  JOB_TIMEOUT: {{ .Values.config.jobTimeout | quote }}
+  MAX_RETRIES: {{ .Values.config.maxRetries | quote }}
+  QUEUE_NAME: {{ .Values.config.queueName | quote }}
+  SERVER_HOST: "0.0.0.0"  # Listen on all interfaces
+  SERVER_PORT: "8080"

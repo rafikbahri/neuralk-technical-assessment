@@ -75,3 +75,24 @@ To remove all resources:
 ```bash
 kubectl delete namespace neuralk
 ```
+
+## Using the Helm Chart
+
+For a more flexible and parameterized deployment across different environments (development, staging, production), we recommend using the Helm chart located in the `../helm/neuralk` directory.
+
+The Helm chart provides:
+
+- Environment-specific configurations
+- Automatic resource allocation based on environment
+- TLS configuration for secure access
+- Simplified deployment and upgrades
+- Worker autoscaling based on load
+
+To deploy using the Helm chart:
+
+```bash
+# For development environment
+helm install neuralk ./deploy/helm/neuralk -f ./deploy/helm/neuralk/values-dev.yaml --create-namespace -n neuralk-dev
+```
+
+For more details, see [../helm/neuralk/README.md](../helm/neuralk/README.md).
