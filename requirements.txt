@@ -9,3 +9,4 @@ rq
 rq-dashboard
 scikit-learn
 setproctitle
+pytest

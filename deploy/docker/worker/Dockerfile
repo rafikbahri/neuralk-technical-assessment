@@ -5,13 +5,13 @@ WORKDIR /neuralk
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY worker.py .
-COPY ml.py .
-COPY config.py .
-COPY logger.py .
+COPY src/api/ src/api/
+COPY src/utils/ src/utils/
+COPY src/core/ src/core/
 
 COPY deploy/docker/worker/.env .
 
+ENV PYTHONPATH="${PYTHONPATH}:/neuralk/src/api:/neuralk/src/utils:/neuralk/src/core"
 ENV OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
-CMD ["python", "worker.py"]
+CMD ["python", "src/core/worker.py"]

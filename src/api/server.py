@@ -35,8 +35,8 @@ import uuid
 from rq import Queue, Retry
 from rq.job import Job
 
-import config
-from logger import get_logger
+import src.utils.config as config
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", "-p", type=int, default=config.SERVER_PORT)
     args = parser.parse_args()
 
-    HOST, PORT = config.SERVER_HOST, args.port
+    HOST, PORT = config.SERVER_HOST, config.SERVER_PORT or args.port
     
     # Get MinIO client from config
     MINIO = config.get_minio_client()
