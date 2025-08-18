@@ -15,8 +15,8 @@ import polars as pl
 import cloudpickle
 import requests
 
-import config
-from logger import get_logger
+import src.utils.config as config
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -51,7 +51,6 @@ services:
     networks:
       - neuralk-network
 
-  # Worker service for processing ML jobs
   worker:
     build:
       context: .
@@ -62,6 +61,9 @@ services:
         limits:
           cpus: 1
           memory: 1024M
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -78,6 +80,13 @@ services:
       dockerfile: deploy/docker/server/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MINIO_HOST=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
     depends_on:
       redis:
         condition: service_healthy
@@ -86,19 +95,12 @@ services:
     restart: unless-stopped
     networks:
       - neuralk-network
-      
-  # Client service for interacting with the API
-  client:
-    build:
-      context: .
-      dockerfile: deploy/docker/client/Dockerfile
-    depends_on:
-      - server
-    volumes:
-      - ./data:/app/data
-    networks:
-      - neuralk-network
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
   neuralk-network:

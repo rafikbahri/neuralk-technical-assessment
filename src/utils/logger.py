@@ -8,7 +8,7 @@ import logging.handlers
 import os
 from datetime import datetime
 
-from config import LOG_LEVEL
+from src.utils.config import LOG_LEVEL
 
 os.makedirs("logs", exist_ok=True)
 

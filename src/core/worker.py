@@ -8,8 +8,8 @@ https://python-rq.org/docs/workers/
 import rq
 import setproctitle
 
-import config
-from logger import get_logger
+import src.utils.config as config
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -1,0 +1,23 @@
+[flake8]
+max-line-length = 100
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .eggs,
+    .tox,
+    .venv,
+    venv
+
+# Ignore specific errors
+extend-ignore = 
+    # Line break before binary operator (conflicts with Black)
+    W503,
+    # Whitespace before ':'
+    E203
+
+# Per-file ignores
+per-file-ignores =
+    # Allow unused imports in __init__.py files
+    **/__init__.py: F401
