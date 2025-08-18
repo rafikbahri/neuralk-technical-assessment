@@ -8,6 +8,7 @@ on:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -43,23 +44,28 @@ jobs:
         flake8 . --count --exit-zero --statistics
 
   test:
+    name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+      fail-fast: false
           
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: ${{ matrix.python-version }}
         
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml', '**/setup.py', '**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml', '**/setup.py', '**/requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
           
     - name: Install dependencies
       run: |
@@ -91,7 +97,10 @@ jobs:
     - name: Run unit tests
       env:
         PYTHONPATH: ${{ github.workspace }}
+        PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
+        python --version
+        echo "Running tests with Python $PYTHON_VERSION"
         pytest tests/ --cov=src --cov-report=xml --cov-report=term -v
         
     - name: Run integration tests
@@ -103,7 +112,9 @@ jobs:
         MINIO_ACCESS_KEY: minioadmin
         MINIO_SECRET_KEY: minioadmin
         OBJC_DISABLE_INITIALIZE_FORK_SAFETY: YES
+        PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
+        echo "Running integration tests with Python $PYTHON_VERSION"
         pytest tests/integration/ -v
         
     - name: Display docker-compose logs on failure
@@ -111,15 +122,12 @@ jobs:
       run: |
         docker-compose logs
         
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
+        flags: python-${{ matrix.python-version }}
+        name: Python ${{ matrix.python-version }}
         fail_ci_if_error: false
         
     - name: Cleanup Docker resources
