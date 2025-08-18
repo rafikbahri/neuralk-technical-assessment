@@ -23,11 +23,11 @@ class Client:
         self.host = host or config.SERVER_HOST
         self.port = port or config.SERVER_PORT
         self.url = f"http://{self.host}:{self.port}"
-        logger.debug(f"Client initialized with URL: {self.url}")
+        logger.info(f"Client initialized with URL: {self.url}")
 
     def upload(self, file_path):
         """Upload a dataset and get its ID."""
-        logger.info(f"Uploading dataset: {file_path}")
+        logger.info(f"Uploading dataset: {file_path} - {self.url}/upload")
         try:
             dataset_info = requests.get(f"{self.url}/upload").json()
             dataset_id = dataset_info["id"]

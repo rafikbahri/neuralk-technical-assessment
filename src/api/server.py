@@ -19,6 +19,8 @@ GET /status?id=<fit or predict ID>
 GET /result?id=<predict ID>
     Returns a presigned url from which the prediction result parquet file can
     be downloaded. `id` is an ID returned by `/predict`.
+GET /health
+    Returns a health check status with Redis and MinIO connection status.
 
 NOTE: currently the server binds to localhost and uses the default connection
 options for Redis (localhost:6379) and MinIO (localhost:9000), which you may
@@ -114,6 +116,58 @@ class Handler(BaseHTTPRequestHandler):
             return
         url = MINIO.get_presigned_url("GET", "results", predict_id)
         self.__send_response(json.dumps({"url": url}))
+        
+    def _do_GET_health(self, query):
+        del query
+        status = {"status": "ok", "services": {}}
+        
+        # Check Redis connection
+        try:
+            redis_info = REDIS.info()
+            status["services"]["redis"] = {
+                "status": "ok",
+                "version": redis_info.get("redis_version", "unknown")
+            }
+        except Exception as e:
+            logger.warning(f"Health check - Redis connection error: {str(e)}")
+            status["services"]["redis"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            status["status"] = "degraded"
+            
+        # Check MinIO connection
+        try:
+            minio_buckets = [bucket.name for bucket in MINIO.list_buckets()]
+            status["services"]["minio"] = {
+                "status": "ok",
+                "buckets": minio_buckets
+            }
+        except Exception as e:
+            logger.warning(f"Health check - MinIO connection error: {str(e)}")
+            status["services"]["minio"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            status["status"] = "degraded"
+            
+        # Check Queue status
+        try:
+            queue_length = QUEUE.count
+            status["services"]["queue"] = {
+                "status": "ok",
+                "jobs": queue_length
+            }
+        except Exception as e:
+            logger.warning(f"Health check - Queue error: {str(e)}")
+            status["services"]["queue"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            status["status"] = "degraded"
+            
+        logger.debug(f"Health check - Status: {status['status']}")
+        self.__send_response(json.dumps(status))
 
     def _do_POST_fit(self, query):
         data_id = query["id"][0]

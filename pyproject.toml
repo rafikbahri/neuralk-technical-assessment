@@ -85,7 +85,6 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=src --cov-report=term-missing"
 testpaths = [
     "tests",
 ]
