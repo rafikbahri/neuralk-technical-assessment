@@ -1,5 +1,7 @@
 # neuralk-technical-assessment
 
+[![CI Status](https://github.com/username/neuralk-technical-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/username/neuralk-technical-assessment/actions/workflows/ci.yml)
+
 Neuralk AI Technical Assessment - DevOps / SRE
 
 ## Architecture Diagram

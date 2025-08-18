@@ -86,19 +86,6 @@ services:
     restart: unless-stopped
     networks:
       - neuralk-network
-      
-  # Client service for interacting with the API
-  client:
-    build:
-      context: .
-      dockerfile: deploy/docker/client/Dockerfile
-    depends_on:
-      - server
-    volumes:
-      - ./data:/app/data
-    networks:
-      - neuralk-network
-    restart: unless-stopped
 
 networks:
   neuralk-network:
