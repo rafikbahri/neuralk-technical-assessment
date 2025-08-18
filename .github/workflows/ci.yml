@@ -91,7 +91,11 @@ jobs:
       run: |
         echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
         echo "Setting PYTHONPATH to ${{ github.workspace }}"
-        
+
+    - name: Add Minio to /etc/hosts
+      run: |
+          echo "127.0.0.1 minio" | sudo tee -a /etc/hosts
+
     - name: Run unit tests
       env:
         PYTHONPATH: ${{ github.workspace }}
