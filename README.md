@@ -1,8 +1,31 @@
 # neuralk-technical-assessment
 
-[![CI Status](https://github.com/username/neuralk-technical-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/username/neuralk-technical-assessment/actions/workflows/ci.yml)
+[![CI](https://github.com/rafikbahri/neuralk-technical-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/rafikbahri/neuralk-technical-assessment/actions/workflows/ci.yml)
 
 Neuralk AI Technical Assessment - DevOps / SRE
+
+## Introduction
+
+This project is a technical assessment for Neuralk AI, focusing on DevOps and SRE practices.
+See technical assessment details in the [TA.md](TA.md).
+
+The app implements a machine learning API service that allows users to:
+
+1. Upload datasets
+2. Train models on those datasets
+3. Make predictions using trained models
+4. Download prediction results
+
+The application consists of the following components:
+
+- A web server (`server.py`) that handles API requests
+- MinIO object storage for datasets, models, and results
+- Redis and RQ for task queueing and processing
+- RQ workers that execute the machine learning tasks
+- ML functions (`ml.py`) containing the core functionality for model training and prediction
+- A client interface (`client.py`) for interacting with the API
+
+Example workflows are provided in `example_1.py` (complete training and prediction workflow) and `example_2.py` (parallel model training).
 
 ## Architecture Diagram
 
@@ -68,26 +91,6 @@ graph TD
     PredictFunc --> |Write results| Results
 ```
 
-## Project Description
-
-This project implements a machine learning API service that allows users to:
-
-1. Upload datasets
-2. Train models on those datasets
-3. Make predictions using trained models
-4. Download prediction results
-
-The application consists of the following components:
-
-- A web server (`server.py`) that handles API requests
-- MinIO object storage for datasets, models, and results
-- Redis and RQ for task queueing and processing
-- RQ workers that execute the machine learning tasks
-- ML functions (`ml.py`) containing the core functionality for model training and prediction
-- A client interface (`client.py`) for interacting with the API
-
-Example workflows are provided in `example_1.py` (complete training and prediction workflow) and `example_2.py` (parallel model training).
-
 ## Configuration with .env Files
 
 The project uses dotenv files for configuration. To set up your environment:
@@ -121,6 +124,8 @@ Available configuration options:
 | MINIO_ACCESS_KEY | MinIO access key | minioadmin |
 | MINIO_SECRET_KEY | MinIO secret key | minioadmin |
 | MINIO_SECURE | Whether to use HTTPS for MinIO | False |
+| MINIO_PROXY_ADDRESS | Address for client to access MinIO (for presigned URLs) | localhost |
+| MINIO_PROXY_PORT | Port for client to access MinIO (for presigned URLs) | 9002 |
 | LOG_LEVEL | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | INFO |
 | JOB_TIMEOUT | RQ job timeout | 600s |
 | MAX_RETRIES | Maximum retries for failed jobs | 4 |
@@ -132,34 +137,16 @@ This project includes Docker Compose configuration for running the required serv
 
 - **Redis**: For job queue management
 - **MinIO**: For object storage (datasets, models, results)
+- **Init Minio**: Job to initialize MinIO buckets
+- **Nginx**: Load balancer and proxy for MinIO presigned URLs
 - **Server**: API server that handles client requests
 - **Worker**: For processing ML tasks in the background
-- **Client**: For interacting with the API
 
 To run the complete stack with Docker Compose, run:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
-
-The client component is actively running and waiting for user commands.
-To run the client workflow, start with generating data:
-
-```bash
-docker-compose exec -t client python make-data.py
-```
-
-Then, you can run the client examples:
-
-```bash
-docker-compose exec -t client python example_1.py --test <test_data_path> --model <model_path>
-```
-
-```bash
-docker-compose exec -t client python example_2.py --test <test_data_path> --model <model_path>
-```
-
-For more details on Docker deployment, see [DOCKER.md](DOCKER.md).
 
 ## Kubernetes Setup
 
@@ -170,7 +157,6 @@ For production deployments, the project includes Kubernetes manifests for deploy
 - MinIO object storage
 - API server
 - ML workers with autoscaling
-- Client deployment
 
 For detailed instructions on Kubernetes deployment, see [deploy/kube/README.md](deploy/kube/README.md).
 
@@ -186,4 +172,3 @@ helm install neuralk ./deploy/helm/neuralk -f deploy/helm/neuralk/values-dev.yam
 ```
 
 For more details on the Helm chart, see [deploy/helm/neuralk/README.md](deploy/helm/neuralk/README.md).
-

@@ -20,9 +20,8 @@ This directory contains Kubernetes manifests for deploying the Neuralk ML API se
 7. **06-init-minio.yaml**: Job to initialize MinIO buckets
 8. **07-worker.yaml**: ML worker deployment
 9. **08-server.yaml**: API server deployment and service
-10. **09-client.yaml**: Client deployment
-11. **10-ingress.yaml**: Ingress for external access
-12. **11-hpa.yaml**: Horizontal Pod Autoscaler for workers
+10. **09-ingress.yaml**: Ingress for external access
+11. **10-hpa.yaml**: Horizontal Pod Autoscaler for workers
 
 ## Deployment
 
@@ -30,19 +29,6 @@ Run:
 
 ```bash
 kubectl apply -f deploy/kube/
-```
-
-## Using the Client
-
-To run commands using the client pod:
-
-```bash
-# Generate data
-kubectl -n neuralk exec -it deployment/client -- python make_data.py
-
-# Execute examples
-kubectl -n neuralk exec -it deployment/client -- python example_1.py
-kubectl -n neuralk exec -it deployment/client -- python example_2.py
 ```
 
 ## Monitoring
