@@ -154,6 +154,12 @@ In this setup, you need to add the following line to your `/etc/hosts/`, in orde
 127.0.0.1 minio
 ```
 
+To be able to run the python modules, you need to export the python path:
+
+```bash
+export PYTHONPATH=$(pwd)
+```
+
 ## Kubernetes Setup
 
 For production deployments, the project includes Kubernetes manifests for deploying all components to a Kubernetes cluster. The manifests are located in the `deploy/kube` directory and include:

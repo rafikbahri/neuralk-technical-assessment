@@ -11,7 +11,7 @@ COPY src/api/ src/api/
 COPY src/utils/ src/utils/
 COPY src/core/ src/core/
 
-ENV PYTHONPATH="${PYTHONPATH}:/neuralk/src/api:/neuralk/src/utils:/neuralk/src/core"
+ENV PYTHONPATH="${PYTHONPATH}:/neuralk/src/"
 
 EXPOSE 8080
 
