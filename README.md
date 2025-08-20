@@ -148,6 +148,12 @@ To run the complete stack with Docker Compose, run:
 docker-compose up -d --build
 ```
 
+In this setup, you need to add the following line to your `/etc/hosts/`, in order for the client to be able to resolve `minio`.
+
+```bash
+127.0.0.1 minio
+```
+
 ## Kubernetes Setup
 
 For production deployments, the project includes Kubernetes manifests for deploying all components to a Kubernetes cluster. The manifests are located in the `deploy/kube` directory and include:
