@@ -115,12 +115,12 @@ Available configuration options:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | SERVER_HOST | Host for the web server | localhost |
-| SERVER_PORT | Port for the web server | 8080 |
+| SERVER_PORT | Port for the web server | 8088 |
 | REDIS_HOST | Redis server host | localhost |
 | REDIS_PORT | Redis server port | 6379 |
 | REDIS_DB | Redis database number | 0 |
 | REDIS_PASSWORD | Redis password (if required) | None |
-| MINIO_HOST | MinIO server host and port | localhost:9000 |
+| MINIO_HOST | MinIO server host and port | localhost:8088 |
 | MINIO_ACCESS_KEY | MinIO access key | minioadmin |
 | MINIO_SECRET_KEY | MinIO secret key | minioadmin |
 | MINIO_SECURE | Whether to use HTTPS for MinIO | False |
