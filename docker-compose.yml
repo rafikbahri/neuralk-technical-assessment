@@ -85,6 +85,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MINIO_HOST=minio:9000
+      - MINIO_PROXY_ADDRESS=localhost
+      - MINIO_PROXY_PORT=8088
+      - MINIO_PROXY_PATH=/minio
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
     depends_on:
@@ -101,6 +104,29 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+      
+  # Envoy as the main proxy for all services
+  envoy:
+    image: envoyproxy/envoy:v1.24-latest
+    ports:
+      - "8088:8088"  # Main proxy port
+      - "9901:9901"  # Admin interface
+    volumes:
+      - ./deploy/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      server:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - neuralk-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9901/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 networks:
   neuralk-network:

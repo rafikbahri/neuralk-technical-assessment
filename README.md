@@ -125,7 +125,8 @@ Available configuration options:
 | MINIO_SECRET_KEY | MinIO secret key | minioadmin |
 | MINIO_SECURE | Whether to use HTTPS for MinIO | False |
 | MINIO_PROXY_ADDRESS | Address for client to access MinIO (for presigned URLs) | localhost |
-| MINIO_PROXY_PORT | Port for client to access MinIO (for presigned URLs) | 9002 |
+| MINIO_PROXY_PORT | Port for client to access MinIO (for presigned URLs) | 8088 |
+| MINIO_PROXY_PATH | Path prefix for MinIO when behind a proxy | /minio |
 | LOG_LEVEL | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | INFO |
 | JOB_TIMEOUT | RQ job timeout | 600s |
 | MAX_RETRIES | Maximum retries for failed jobs | 4 |
@@ -136,17 +137,32 @@ Available configuration options:
 This project includes Docker Compose configuration for running the required services. The Docker Compose setup includes:
 
 - **Redis**: For job queue management
+- **Redis Commander**: Web UI for Redis monitoring and management
 - **MinIO**: For object storage (datasets, models, results)
 - **Init Minio**: Job to initialize MinIO buckets
-- **Nginx**: Load balancer and proxy for MinIO presigned URLs
 - **Server**: API server that handles client requests
 - **Worker**: For processing ML tasks in the background
+- **Envoy**: Unified API gateway for all services
 
 To run the complete stack with Docker Compose, run:
 
 ```bash
 docker-compose up -d --build
 ```
+
+## Envoy API Gateway
+
+The project uses Envoy as an API gateway to provide unified access to all services through a single endpoint. All services are accessible through `http://localhost:8088` with different path prefixes:
+
+| Service | Access URL | Description |
+|---------|------------|-------------|
+| Server API | `http://localhost:8088/` | Main API endpoints |
+| MinIO API | `http://localhost:8088/minio/` | MinIO object storage API |
+| MinIO Console | `http://localhost:8088/minio-console/` | MinIO web console |
+| Redis Commander | `http://localhost:8088/redis/` | Redis web UI |
+| Envoy Admin | `http://localhost:9901/` | Envoy administration interface |
+
+This unified access pattern simplifies service discovery and interaction, especially for client applications that need to communicate with multiple services.
 
 In this setup, you need to add the following line to your `/etc/hosts/`, in order for the client to be able to resolve `minio`.
 
