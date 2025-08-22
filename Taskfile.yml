@@ -1,0 +1,97 @@
+# https://taskfile.dev
+
+version: '3'
+
+env:
+  PYTHONPATH: "{{.PWD}}"
+  OBJC_DISABLE_INITIALIZE_FORK_SAFETY: "YES"
+
+dotenv:
+  - .env
+
+tasks:
+  help:
+    desc: Show help
+    cmds:
+      - task --list
+    silent: true
+  
+  default:
+    desc: Run build (docker) and test tasks
+    deps:
+      - task: install
+        silent: true
+      - task: "run:compose:up"
+        silent: true
+    cmds:
+      - pytest
+    silent: false
+
+  "check:requirements":
+    desc: "Check system requirements"
+    cmds:
+      - redis-server --version
+      - redis-cli ping
+      - minio --version
+    silent: false
+
+  install:
+    desc: Install dependencies
+    cmds:
+      - source venv/bin/activate
+      - pip install -r requirements.txt
+
+  "run:worker":
+    desc: Run a single worker
+    cmds:
+      - cd src/core && rq worker -w worker.Worker
+
+  "run:workers":
+    desc: Run multiple workers
+    cmds:
+      - cd src/core && rq worker-pool -n {{.WORKER_COUNT | default 3}} -w worker.Worker
+
+  "run:server":
+    desc: Run the API server
+    deps:
+      - "check:requirements"
+      - install
+    cmds:
+      - python src/api/server.py
+
+  "run:examples":
+    desc: Run examples
+    deps:
+      - "check:requirements"
+      - install
+    cmds:
+      - python example_1.py
+      - python example_2.py
+
+  "run:tests":
+    desc: Run tests
+    deps:
+      - "check:requirements"
+      - install
+    cmds:
+      - pytest
+
+  "run:compose:up":
+    desc: Run Docker Compose
+    cmds:
+      - docker compose up --detach
+
+  "run:compose:down":
+    desc: Stop Docker Compose
+    cmds:
+      - docker compose down
+
+  cleanup:
+    desc: Cleanup Docker resources (containers, images, volumes...)
+    cmds:
+      - read -p "This task is destructive. Continue? (y/n)" confirm && [ "$confirm" = "y" ] && docker compose down --volumes
+
+  rq-dashboard:
+    desc: Run RQ Dashboard
+    cmds:
+      - rq-dashboard
