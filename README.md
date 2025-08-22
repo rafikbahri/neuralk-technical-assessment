@@ -4,92 +4,21 @@
 
 Neuralk AI Technical Assessment - DevOps / SRE
 
-## Introduction
+## Overview
 
-This project is a technical assessment for Neuralk AI, focusing on DevOps and SRE practices.
-See technical assessment details in the [TA.md](TA.md).
+This is a toy project to assess DevOps and SRE skills.
+Please check the [technical assessment](docs/ta.md) for more details.
+A detailed architecture of the different components forming the app is provided in the [architecture document](docs/arch.md).
 
-The app implements a machine learning API service that allows users to:
+## Pre-requisites
 
-1. Upload datasets
-2. Train models on those datasets
-3. Make predictions using trained models
-4. Download prediction results
+Before you begin, ensure you have met the following requirements:
 
-The application consists of the following components:
-
-- A web server (`server.py`) that handles API requests
-- MinIO object storage for datasets, models, and results
-- Redis and RQ for task queueing and processing
-- RQ workers that execute the machine learning tasks
-- ML functions (`ml.py`) containing the core functionality for model training and prediction
-- A client interface (`client.py`) for interacting with the API
-
-Example workflows are provided in `example_1.py` (complete training and prediction workflow) and `example_2.py` (parallel model training).
-
-## Architecture Diagram
-
-```mermaid
-graph TD
-    %% Define Client interactions
-    Client([Client]) --> |1\. Upload dataset| Server
-    Client --> |3\. Request model training| Server
-    Client --> |5\. Upload test data| Server
-    Client --> |7\. Request prediction| Server
-    Client --> |9\. Download results| Server
-    Client --> |Check job status| Server
-    
-    %% Define Server component
-    subgraph Server["Web Server (server.py)"]
-        Upload["/upload endpoint"]
-        Fit["/fit endpoint"]
-        Predict["/predict endpoint"]
-        Status["/status endpoint"]
-        Result["/result endpoint"]
-    end
-    
-    %% Define Storage component
-    subgraph MinIO["Object Storage (MinIO)"]
-        Datasets[("datasets bucket")]
-        Models[("models bucket")]
-        Results[("results bucket")]
-    end
-    
-    %% Define Queue and Workers
-    subgraph Redis["Task Queue (Redis)"]
-        Queue[("RQ Queue")]
-    end
-    
-    subgraph Workers["RQ Workers (worker.py)"]
-        Worker1["Worker 1"]
-        Worker2["Worker 2"]
-        WorkerN["Worker N..."]
-    end
-    
-    %% Define ML component
-    subgraph ML["Machine Learning (ml.py)"]
-        FitFunc["fit()"]
-        PredictFunc["predict()"]
-    end
-    
-    %% Define flow from server to storage
-    Upload --> |2\. Generate presigned URL| Datasets
-    Fit --> |4\. Enqueue fit job| Queue
-    Predict --> |8\. Enqueue predict job| Queue
-    Result --> |10\. Generate download URL| Results
-    Status --> |Query job status| Queue
-    
-    %% Define worker interactions
-    Queue --> |Dispatch job| Workers
-    Workers --> |Execute| ML
-    
-    %% Define ML interactions with storage
-    FitFunc --> |Read training data| Datasets
-    FitFunc --> |Write model| Models
-    PredictFunc --> |Read test data| Datasets
-    PredictFunc --> |Read model| Models
-    PredictFunc --> |Write results| Results
-```
+- Docker and Docker Compose installed
+- Python 3.10 or higher
+- Redis for task queueing
+- MinIO for object storage
+- Taskfile for build automation
 
 ## Configuration with .env Files
 
@@ -144,15 +73,9 @@ This project includes Docker Compose configuration for running the required serv
 - **Worker**: For processing ML tasks in the background
 - **Envoy**: Unified API gateway for all services
 
-To run the complete stack with Docker Compose, run:
+### Envoy
 
-```bash
-docker-compose up -d --build
-```
-
-## Envoy API Gateway
-
-The project uses Envoy as an API gateway to provide unified access to all services through a single endpoint. All services are accessible through `http://localhost:8088` with different path prefixes:
+The project uses Envoy proxy to provide unified access to all services through a single endpoint. All services are accessible through `http://localhost:8088` with different path prefixes:
 
 | Service | Access URL | Description |
 |---------|------------|-------------|
@@ -172,10 +95,36 @@ In this setup, you need to add the following line to your `/etc/hosts/`, in orde
 
 Read more about Minio presigned URL issue [here](https://github.com/minio/minio/issues/8007).
 
+To run the complete stack with Docker Compose, run:
+
+```bash
+task run:compose:up
+```
+
+### Tests and examples
+
 To be able to run the python modules, you need to export the python path:
 
 ```bash
 export PYTHONPATH=$(pwd)
+```
+
+To run the examples:
+
+```bash
+task run:examples
+```
+
+To run the tests:
+
+```bash
+task run:tests
+```
+
+Find out the help and more command line options by running:
+
+```bash
+task help
 ```
 
 ## Kubernetes Setup
@@ -202,3 +151,11 @@ helm install neuralk ./deploy/helm/neuralk -f deploy/helm/neuralk/values-dev.yam
 ```
 
 For more details on the Helm chart, see [deploy/helm/neuralk/README.md](deploy/helm/neuralk/README.md).
+
+## Cleanup
+
+To cleanup the docker resources, run:
+
+```bash
+task cleanup
+```
