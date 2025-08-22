@@ -79,7 +79,7 @@ tasks:
   "run:compose:up":
     desc: Run Docker Compose
     cmds:
-      - docker compose up --detach --build
+      - docker compose up --detach
 
   "run:compose:down":
     desc: Stop Docker Compose

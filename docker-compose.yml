@@ -102,7 +102,7 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.24-latest
     ports:
-      - "8088:8088"  # Main proxy port
+      - "8080:8080"  # Main proxy port
       - "9901:9901"  # Admin interface
     volumes:
       - ./deploy/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
@@ -131,6 +131,8 @@ services:
     restart: unless-stopped
     networks:
       - neuralk-network
+    profiles:
+      - dev
 
 networks:
   neuralk-network:

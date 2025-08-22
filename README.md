@@ -44,17 +44,17 @@ Available configuration options:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | SERVER_HOST | Host for the web server | localhost |
-| SERVER_PORT | Port for the web server | 8088 |
+| SERVER_PORT | Port for the web server | 8080 |
 | REDIS_HOST | Redis server host | localhost |
 | REDIS_PORT | Redis server port | 6379 |
 | REDIS_DB | Redis database number | 0 |
 | REDIS_PASSWORD | Redis password (if required) | None |
-| MINIO_HOST | MinIO server host and port | localhost:8088 |
+| MINIO_HOST | MinIO server host and port | localhost:8080 |
 | MINIO_ACCESS_KEY | MinIO access key | minioadmin |
 | MINIO_SECRET_KEY | MinIO secret key | minioadmin |
 | MINIO_SECURE | Whether to use HTTPS for MinIO | False |
 | MINIO_PROXY_ADDRESS | Address for client to access MinIO (for presigned URLs) | localhost |
-| MINIO_PROXY_PORT | Port for client to access MinIO (for presigned URLs) | 8088 |
+| MINIO_PROXY_PORT | Port for client to access MinIO (for presigned URLs) | 8080 |
 | MINIO_PROXY_PATH | Path prefix for MinIO when behind a proxy | /minio |
 | LOG_LEVEL | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL) | INFO |
 | JOB_TIMEOUT | RQ job timeout | 600s |
@@ -75,14 +75,14 @@ This project includes Docker Compose configuration for running the required serv
 
 ### Envoy
 
-The project uses Envoy proxy to provide unified access to all services through a single endpoint. All services are accessible through `http://localhost:8088` with different path prefixes:
+The project uses Envoy proxy to provide unified access to all services through a single endpoint. All services are accessible through `http://localhost:8080` with different path prefixes:
 
 | Service | Access URL | Description |
 |---------|------------|-------------|
-| Server API | `http://localhost:8088/` | Main API endpoints |
-| MinIO API | `http://localhost:8088/minio/` | MinIO object storage API |
-| MinIO Console | `http://localhost:8088/minio-console/` | MinIO web console |
-| Redis Commander | `http://localhost:8088/redis/` | Redis web UI |
+| Server API | `http://localhost:8080/` | Main API endpoints |
+| MinIO API | `http://localhost:8080/minio/` | MinIO object storage API |
+| MinIO Console | `http://localhost:8080/minio-console/` | MinIO web console |
+| Redis Commander | `http://localhost:8080/redis/` | Redis web UI |
 | Envoy Admin | `http://localhost:9901/` | Envoy administration interface |
 
 This unified access pattern simplifies service discovery and interaction, especially for client applications that need to communicate with multiple services.
