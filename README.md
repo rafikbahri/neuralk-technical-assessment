@@ -164,11 +164,13 @@ The project uses Envoy as an API gateway to provide unified access to all servic
 
 This unified access pattern simplifies service discovery and interaction, especially for client applications that need to communicate with multiple services.
 
-In this setup, you need to add the following line to your `/etc/hosts/`, in order for the client to be able to resolve `minio`.
+In this setup, you need to add the following line to your `/etc/hosts/`, in order for the client to be able to resolve `minio` and use the presigned URLs.
 
 ```bash
 127.0.0.1 minio
 ```
+
+Read more about Minio presigned URL issue [here](https://github.com/minio/minio/issues/8007).
 
 To be able to run the python modules, you need to export the python path:
 

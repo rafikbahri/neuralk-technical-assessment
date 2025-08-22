@@ -37,6 +37,12 @@ static_resources:
                 route:
                   prefix_rewrite: "/"
                   cluster: minio_console_service
+              # Route to Redis Commander (if you want to add a Redis web UI)
+              - match:
+                  prefix: "/redis/"
+                route:
+                  prefix_rewrite: "/"
+                  cluster: redis_commander_service
               # Route to Server API (default route)
               - match:
                   prefix: "/"
@@ -90,3 +96,16 @@ static_resources:
                 address: minio
                 port_value: 9001
   
+  - name: redis_commander_service
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: redis_commander_service
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: redis-commander
+                port_value: 8081

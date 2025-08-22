@@ -1,8 +1,6 @@
 services:
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
@@ -78,16 +76,11 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/server/Dockerfile
-    ports:
-      - "8080:8080"
     environment:
       - SERVER_HOST=0.0.0.0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MINIO_HOST=minio:9000
-      - MINIO_PROXY_ADDRESS=localhost
-      - MINIO_PROXY_PORT=8088
-      - MINIO_PROXY_PATH=/minio
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
     depends_on:
@@ -127,6 +120,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+      
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - neuralk-network
 
 networks:
   neuralk-network:
