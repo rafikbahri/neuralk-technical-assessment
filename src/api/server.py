@@ -40,6 +40,10 @@ from rq.job import Job
 import src.utils.config as config
 from src.utils.logger import get_logger
 
+from opentelemetry import trace
+
+tracer = trace.get_tracer("neuralk.tracer")
+
 logger = get_logger(__name__)
 
 
@@ -80,6 +84,7 @@ class Handler(BaseHTTPRequestHandler):
             logger.error(f"Error processing request: {type(e).__name__}: {e}", exc_info=True)
             self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Error")
 
+    @tracer.start_as_current_span("do_GET_upload")
     def _do_GET_upload(self, query):
         del query
         id = str(uuid.uuid4())
@@ -87,6 +92,7 @@ class Handler(BaseHTTPRequestHandler):
         logger.info(f"Dataset upload requested. Generated ID: {id}")
         self.__send_response(json.dumps({"url": url, "id": id}))
 
+    @tracer.start_as_current_span("do_GET_status")
     def _do_GET_status(self, query):
         id = query["id"][0]
         job = Job.fetch(id, connection=REDIS)
@@ -105,6 +111,7 @@ class Handler(BaseHTTPRequestHandler):
             )
         )
 
+    @tracer.start_as_current_span("do_GET_result")
     def _do_GET_result(self, query):
         predict_id = query["id"][0]
         job = Job.fetch(predict_id, connection=REDIS)
@@ -116,7 +123,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         url = MINIO.get_presigned_url("GET", "results", predict_id)
         self.__send_response(json.dumps({"url": url}))
-        
+
+    @tracer.start_as_current_span("do_GET_health")
     def _do_GET_health(self, query):
         del query
         status = {"status": "ok", "services": {}}
@@ -168,7 +176,8 @@ class Handler(BaseHTTPRequestHandler):
             
         logger.debug(f"Health check - Status: {status['status']}")
         self.__send_response(json.dumps(status))
-
+    
+    @tracer.start_as_current_span("do_POST_fit")
     def _do_POST_fit(self, query):
         data_id = query["id"][0]
         data_url = MINIO.get_presigned_url("GET", "datasets", data_id)
@@ -185,6 +194,7 @@ class Handler(BaseHTTPRequestHandler):
         logger.debug(f"Fit job enqueued with ID: {model_id}")
         self.__send_response(json.dumps({"id": model_id}))
 
+    @tracer.start_as_current_span("do_POST_predict")
     def _do_POST_predict(self, query):
         data_id = query["dataset_id"][0]
         data_url = MINIO.get_presigned_url("GET", "datasets", data_id)

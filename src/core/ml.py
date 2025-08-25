@@ -17,6 +17,9 @@ import requests
 
 import src.utils.config as config
 from src.utils.logger import get_logger
+from opentelemetry import trace
+
+tracer = trace.get_tracer("neuralk.tracer")
 
 logger = get_logger(__name__)
 
@@ -31,7 +34,7 @@ def _error_maybe():
         logger.warning("Simulating a random error in the system")
         raise RuntimeError("Something unexpected went wrong")
 
-
+@tracer.start_as_current_span("fit")
 def fit(data_url, model_url):
     """
     Fit a gradient boosting model.
@@ -85,7 +88,7 @@ def fit(data_url, model_url):
         logger.error(f"Model training failed: {type(e).__name__}: {e}", exc_info=True)
         raise
 
-
+@tracer.start_as_current_span("predict")
 def predict(data_url, model_url, result_url):
     """
     Make a prediction with a fitted model.

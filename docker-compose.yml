@@ -43,7 +43,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
+      interval: 1m
       timeout: 5s
       retries: 5
     volumes:
@@ -77,6 +77,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/worker/Dockerfile
+    command: ["opentelemetry-instrument", "--logs_exporter", "otlp", "python", "src/core/worker.py"]
     deploy:
       replicas: 1
       resources:
@@ -89,6 +90,12 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_SERVICE_NAME=neuralk-worker
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=neuralk-worker,service.version=1.0.0
     depends_on:
       redis:
         condition: service_healthy
