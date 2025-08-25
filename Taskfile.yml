@@ -79,12 +79,22 @@ tasks:
   "run:compose:up":
     desc: Run Docker Compose
     cmds:
-      - docker compose up --detach
+      - docker compose up --detach --build
 
   "run:compose:down":
     desc: Stop Docker Compose
     cmds:
-      - docker compose down
+      - docker compose down {{.CLI_ARGS}}
+
+  "run:compose:logs":
+    desc: View Docker Compose logs
+    cmds:
+      - docker compose logs -f
+
+  "run:compose:scale":
+    desc: Scale Docker Compose workers
+    cmds:
+      - docker compose up --detach --scale worker={{.WORKER_COUNT | default 3}}
 
   cleanup:
     desc: Cleanup Docker resources (containers, images, volumes...)

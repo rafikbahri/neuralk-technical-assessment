@@ -11,6 +11,10 @@ import setproctitle
 import src.utils.config as config
 from src.utils.logger import get_logger
 
+from opentelemetry import trace
+
+tracer = trace.get_tracer("neuralk.tracer")
+
 logger = get_logger(__name__)
 
 
@@ -25,11 +29,13 @@ def handle_exception(job, exc_type, exc_value, traceback):
 
 
 class Worker(rq.Worker):
+    @tracer.start_as_current_span("worker_init")
     def __init__(self, *args, exception_handlers=None, **kwargs):
         if exception_handlers is None:
             exception_handlers = [handle_exception]
         super().__init__(*args, exception_handlers=exception_handlers, **kwargs)
-        
+
+    @tracer.start_as_current_span("execute_job")
     def execute_job(self, job, *args, **kwargs):
         """Override to add logging before and after job execution"""
         logger.info(f"Starting job {job.id} of type {job.func_name}")
