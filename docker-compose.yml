@@ -83,6 +83,12 @@ services:
       - MINIO_HOST=minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
+      - OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_SERVICE_NAME=neuralk-server
+      - OTEL_SERVICE_VERSION=1.0.0
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=neuralk-server,service.version=1.0.0
     depends_on:
       redis:
         condition: service_healthy
@@ -91,6 +97,7 @@ services:
     restart: unless-stopped
     networks:
       - neuralk-network
+    command: ["opentelemetry-instrument", "--logs_exporter", "otlp", "python", "src/api/server.py"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -133,6 +140,33 @@ services:
       - neuralk-network
     profiles:
       - dev
+
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./deploy/otel/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    command: ["--config", "/etc/otelcol/config.yaml"]
+    restart: unless-stopped
+    ports:
+      - "4317:4317"  # gRPC
+      - "4318:4318"  # HTTP
+    networks:
+      - neuralk-network
+    # profiles:
+    #   - monitoring
+    depends_on:
+      - jaeger
+    
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"  # UI
+      - "14250:14250"  # gRPC
+      # - "4317:4317"  # OTLP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - neuralk-network
 
 networks:
   neuralk-network:

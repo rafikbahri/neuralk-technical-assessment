@@ -13,6 +13,8 @@ COPY src/core/ src/core/
 
 ENV PYTHONPATH="${PYTHONPATH}:/neuralk/src/"
 
+RUN opentelemetry-bootstrap -a install
+
 EXPOSE 8080
 
 CMD ["python", "src/api/server.py"]
