@@ -11,4 +11,6 @@ COPY src/core/ src/core/
 
 ENV PYTHONPATH="${PYTHONPATH}:/neuralk/src/"
 
+RUN opentelemetry-bootstrap -a install
+
 CMD ["python", "src/core/worker.py"]
