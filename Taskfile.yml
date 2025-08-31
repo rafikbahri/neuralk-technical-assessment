@@ -8,7 +8,7 @@ env:
 
 dotenv:
   - .env
-# test
+
 tasks:
   help:
     desc: Show help
