@@ -31,8 +31,8 @@ class Client:
         try:
             dataset_info = requests.get(f"{self.url}/upload").json()
             dataset_id = dataset_info["id"]
-            logger.debug(f"Got upload URL and ID: {dataset_id}")
-            
+            logger.debug(f"Got upload URL: {dataset_info['url']} - ID: {dataset_id}")
+
             with open(file_path, "rb") as f:
                 response = requests.put(dataset_info["url"], f)
                 response.raise_for_status()

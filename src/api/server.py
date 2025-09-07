@@ -58,7 +58,7 @@ class Handler(BaseHTTPRequestHandler):
     def __send_response(self, msg):
         msg = msg.encode("utf-8")
         self.send_response(HTTPStatus.OK)
-        self.send_header("Content-type", "text/plain")
+        self.send_header("Content-type", "application/json")
         self.send_header("Content-Length", str(len(msg)))
         self.end_headers()
         self.wfile.write(msg)

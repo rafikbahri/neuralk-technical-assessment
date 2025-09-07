@@ -112,6 +112,7 @@ services:
       dockerfile: deploy/docker/server/Dockerfile
     environment:
       - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8085
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MINIO_HOST=minio:9000
@@ -128,7 +129,7 @@ services:
     command: ["opentelemetry-instrument", "--logs_exporter", "otlp", "python", "src/api/server.py"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -143,7 +144,7 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.24-latest
     ports:
-      - "8080:8080"  # Main proxy port
+      - "8088:8088"  # Main proxy port
       - "9901:9901"  # Admin interface
     networks:
       - neuralk-network
